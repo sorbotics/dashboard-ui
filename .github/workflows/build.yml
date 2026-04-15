@@ -73,6 +73,7 @@ jobs:
 
     container:
       image: registry.access.redhat.com/ubi9/nodejs-18:latest
+      options: --user 0
 
     env:
       CI: "true"
