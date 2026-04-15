@@ -228,6 +228,16 @@ jobs:
           find . -type f \( -name "*.deb" -o -name "*.rpm" \) -exec sha256sum {} \; > checksums.txt
           cat checksums.txt
 
+      - name: Prepare release variables
+        id: relvars
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
       - name: Upload release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
@@ -247,23 +257,20 @@ jobs:
 
             ### Install on Debian/Ubuntu
             ```bash
-            VERSION="${GITHUB_REF_NAME#v}"
-            curl -fL -o /tmp/sorba-dashboard-ui_${VERSION}_amd64.deb \
-              https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/sorba-dashboard-ui_${VERSION}_amd64.deb
-            sudo apt update
+            VERSION="${{ steps.relvars.outputs.version }}"
+            curl -fL -o /tmp/sorba-dashboard-ui_${VERSION}_amd64.deb https://github.com/${{ github.repository }}/releases/download/${{ steps.relvars.outputs.tag }}/sorba-dashboard-ui_${VERSION}_amd64.deb
             sudo apt install -y /tmp/sorba-dashboard-ui_${VERSION}_amd64.deb
             ```
 
             ### Install on RHEL9
             ```bash
-            VERSION="${GITHUB_REF_NAME#v}"
-            curl -fL -o /tmp/sorba-dashboard-ui-${VERSION}.rpm \
-              https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/sorba-dashboard-ui-${VERSION}.el9.x86_64.rpm
+            VERSION="${{ steps.relvars.outputs.version }}"
+            curl -fL -o /tmp/sorba-dashboard-ui-${VERSION}.rpm https://github.com/${{ github.repository }}/releases/download/${{ steps.relvars.outputs.tag }}/sorba-dashboard-ui-${VERSION}.el9.x86_64.rpm
             sudo dnf install -y /tmp/sorba-dashboard-ui-${VERSION}.rpm
             ```
 
             ### Verify integrity
             ```bash
-            curl -fL -O https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/checksums.txt
+            curl -fL -O https://github.com/${{ github.repository }}/releases/download/${{ steps.relvars.outputs.tag }}/checksums.txt
             sha256sum -c checksums.txt
             ```
