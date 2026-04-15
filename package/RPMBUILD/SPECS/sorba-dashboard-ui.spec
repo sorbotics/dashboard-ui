@@ -9,7 +9,7 @@ Version: %{version}
 Release: %{release}%{?dist}
 Summary: SORBA Dashboard UI based on Grafana
 
-License: AGPL-3.0-only
+License: AGPLv3
 URL: https://github.com/sorbotics/dashboard-ui
 Source0: files.tar.gz
 
