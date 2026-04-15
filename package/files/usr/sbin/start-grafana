@@ -1,0 +1,26 @@
+#!/bin/bash
+
+GRAFANA_HOME=/usr/share/grafana
+CONF_FILE=/etc/grafana/grafana.ini
+PROVISIONING_CFG_DIR=/etc/grafana/provisioning
+DATA_DIR=/var/lib/grafana
+LOG_DIR=/var/log/grafana
+PLUGINS_DIR=/var/lib/grafana/plugins
+
+DEFAULT_MYSQL_HOST="127.0.0.1"
+DEFAULT_MYSQL_PORT="3306"
+DEFAULT_MYSQL_USERNAME="root"
+DEFAULT_MYSQL_PASSWORD="sbrQp10"
+
+DEFAULT_INFLUX_HOST="127.0.0.1"
+DEFAULT_INFLUX_PORT="8086"
+
+export MYSQL_HOST=${MYSQL_HOST:-$DEFAULT_MYSQL_HOST}
+export MYSQL_PORT=${MYSQL_PORT:-$DEFAULT_MYSQL_PORT}
+export MYSQL_USERNAME=${MYSQL_USERNAME:-$DEFAULT_MYSQL_USERNAME}
+export MYSQL_PASSWORD=${MYSQL_PASSWORD:-$DEFAULT_MYSQL_PASSWORD}
+
+export INFLUX_HOST=${INFLUX_HOST:-DEFAULT_INFLUX_HOST}
+export INFLUX_PORT=${INFLUX_PORT:-DEFAULT_INFLUX_PORT}
+
+exec /usr/sbin/grafana-server --homepath=$GRAFANA_HOME --config=$CONF_FILE --packaging=deb cfg:paths.provisioning=$PROVISIONING_CFG_DIR cfg:paths.data=$DATA_DIR cfg:paths.logs=$LOG_DIR cfg:paths.plugins=$PLUGINS_DIR cfg:database.host="$MYSQL_HOST:$MYSQL_PORT" cfg:database.user="$MYSQL_USERNAME" cfg:database.password="$MYSQL_PASSWORD"

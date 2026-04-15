@@ -1,0 +1,17 @@
+version: '3.0'
+
+services:
+  grafana:
+    container_name: 'sorba-video-panel'
+    build:
+      context: ./.config
+      args:
+        grafana_version: ${GRAFANA_VERSION:-8.4.3}
+    ports:
+      - 3000:3000/tcp
+    volumes:
+      - ./dist:/var/lib/grafana/plugins/sorba-video-panel
+      - ./provisioning:/etc/grafana/provisioning
+      - ./custom.ini:/etc/grafana/grafana.ini
+    environment:
+      - GF_PATHS_CONFIG=/etc/grafana/grafana.ini

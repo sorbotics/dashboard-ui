@@ -1,0 +1,17 @@
+stages:
+  - build
+  - deploy
+
+include:
+  - project: 'sorbotics/devops/ci-cd'
+    ref: main
+    file: '/templates/debian_deb.gitlab-ci.yml'
+  - project: 'sorbotics/devops/ci-cd'
+    ref: main
+    file: '/templates/rhel_rpm.gitlab-ci.yml'
+  - project: 'sorbotics/devops/ci-cd'
+    ref: main
+    file: '/templates/docker_image_build.gitlab-ci.yml'
+  - project: 'sorbotics/devops/ci-cd'
+    ref: main
+    file: '/templates/docker_image_deploy.gitlab-ci.yml'

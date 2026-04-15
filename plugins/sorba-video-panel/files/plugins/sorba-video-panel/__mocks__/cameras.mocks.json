@@ -1,0 +1,238 @@
+{
+  "page": 1,
+  "results": 3,
+  "count": 3,
+  "rows": [
+    {
+      "id": "049d1433-0871-4d7e-a9ff-52c8836d45b7",
+      "name": "cam214",
+      "ffmpeg": {
+        "inputs": [
+          {
+            "path": "rtsp://localhost",
+            "roles": ["rtmp"]
+          }
+        ]
+      },
+      "createdAt": "2023-02-06T19:14:32.000Z",
+      "updatedAt": "2023-02-06T19:14:32.000Z",
+      "record": {
+        "id": "936cb963-061e-40fa-8d4c-2b34cf2bc957",
+        "enabled": false,
+        "expire_interval": 60,
+        "retain": {
+          "days": "10",
+          "mode": "all"
+        },
+        "retain_days": null,
+        "events": {
+          "retain": {
+            "mode": "motion",
+            "default": 10
+          },
+          "pre_capture": 5,
+          "post_capture": 5
+        },
+        "createdAt": "2023-02-06T19:14:32.000Z",
+        "updatedAt": "2023-02-06T19:15:51.000Z",
+        "cameraId": "049d1433-0871-4d7e-a9ff-52c8836d45b7"
+      },
+      "snapshots": {
+        "id": "10aa61bc-1ac0-4c65-8ce1-6b459c8723e7",
+        "bounding_box": true,
+        "clean_copy": true,
+        "crop": false,
+        "enabled": false,
+        "height": 0,
+        "quality": 70,
+        "retain": {
+          "mode": "motion",
+          "default": 10
+        },
+        "timestamp": false,
+        "createdAt": "2023-02-06T19:14:32.000Z",
+        "updatedAt": "2023-02-06T19:15:51.000Z",
+        "cameraId": "049d1433-0871-4d7e-a9ff-52c8836d45b7"
+      },
+      "detect": {
+        "id": "f2ac8ff4-635d-4b7d-87d3-cbf833670646",
+        "width": 1280,
+        "height": 720,
+        "fps": 5,
+        "enabled": true,
+        "max_disappeared": 25,
+        "stationary": {
+          "interval": 0,
+          "threshold": 50,
+          "max_frames": {
+            "default": 3000
+          }
+        },
+        "createdAt": "2023-02-06T19:14:32.000Z",
+        "updatedAt": "2023-02-06T19:15:51.000Z",
+        "cameraId": "049d1433-0871-4d7e-a9ff-52c8836d45b7"
+      },
+      "objects": {
+        "id": "3fe7d9d5-d222-4449-bfcd-b24a720e050a",
+        "track": ["person"],
+        "createdAt": "2023-02-06T19:14:32.000Z",
+        "updatedAt": "2023-02-06T19:15:51.000Z",
+        "cameraId": "049d1433-0871-4d7e-a9ff-52c8836d45b7"
+      }
+    },
+    {
+      "id": "5525f492-aa7d-446e-aa65-79f3f73dc6b2",
+      "name": "cam220",
+      "ffmpeg": {
+        "inputs": [
+          {
+            "path": "rtsp://localhost",
+            "roles": ["rtmp"]
+          }
+        ]
+      },
+      "createdAt": "2023-02-06T19:16:06.000Z",
+      "updatedAt": "2023-02-06T19:16:06.000Z",
+      "record": {
+        "id": "2a432ed5-fb14-439f-abe3-f51a11223613",
+        "enabled": false,
+        "expire_interval": 60,
+        "retain": {
+          "days": "10",
+          "mode": "all"
+        },
+        "retain_days": null,
+        "events": {
+          "retain": {
+            "mode": "motion",
+            "default": 10
+          },
+          "pre_capture": 5,
+          "post_capture": 5
+        },
+        "createdAt": "2023-02-06T19:16:06.000Z",
+        "updatedAt": "2023-02-06T19:16:06.000Z",
+        "cameraId": "5525f492-aa7d-446e-aa65-79f3f73dc6b2"
+      },
+      "snapshots": {
+        "id": "d7c91bfa-cb39-40eb-bb8b-1b458e508896",
+        "bounding_box": true,
+        "clean_copy": true,
+        "crop": false,
+        "enabled": false,
+        "height": 0,
+        "quality": 70,
+        "retain": {
+          "mode": "motion",
+          "default": 10
+        },
+        "timestamp": false,
+        "createdAt": "2023-02-06T19:16:06.000Z",
+        "updatedAt": "2023-02-06T19:16:06.000Z",
+        "cameraId": "5525f492-aa7d-446e-aa65-79f3f73dc6b2"
+      },
+      "detect": {
+        "id": "2c29918d-9d48-48e6-a9cf-e030c56e04f5",
+        "width": 1280,
+        "height": 720,
+        "fps": 5,
+        "enabled": true,
+        "max_disappeared": 25,
+        "stationary": {
+          "interval": 0,
+          "threshold": 50,
+          "max_frames": {
+            "default": 3000
+          }
+        },
+        "createdAt": "2023-02-06T19:16:07.000Z",
+        "updatedAt": "2023-02-06T19:16:07.000Z",
+        "cameraId": "5525f492-aa7d-446e-aa65-79f3f73dc6b2"
+      },
+      "objects": {
+        "id": "9772d39d-e54d-4f50-ae71-57cd9a57f32c",
+        "track": ["person"],
+        "createdAt": "2023-02-06T19:16:06.000Z",
+        "updatedAt": "2023-02-06T19:16:06.000Z",
+        "cameraId": "5525f492-aa7d-446e-aa65-79f3f73dc6b2"
+      }
+    },
+    {
+      "id": "58675681-42f5-48f9-b67a-5e2d8d0f86c3",
+      "name": "cam2142",
+      "ffmpeg": {
+        "inputs": [
+          {
+            "path": "rtsp://localhost",
+            "roles": ["rtmp"]
+          }
+        ]
+      },
+      "createdAt": "2023-02-07T13:51:45.000Z",
+      "updatedAt": "2023-02-07T13:51:45.000Z",
+      "record": {
+        "id": "b57bcb5a-c9e1-4c23-b42a-e7d679bdf15f",
+        "enabled": false,
+        "expire_interval": 60,
+        "retain": {
+          "days": "10",
+          "mode": "all"
+        },
+        "retain_days": null,
+        "events": {
+          "retain": {
+            "mode": "motion",
+            "default": 10
+          },
+          "pre_capture": 5,
+          "post_capture": 5
+        },
+        "createdAt": "2023-02-07T13:51:45.000Z",
+        "updatedAt": "2023-02-07T13:51:45.000Z",
+        "cameraId": "58675681-42f5-48f9-b67a-5e2d8d0f86c3"
+      },
+      "snapshots": {
+        "id": "c2d7f033-aa17-4148-af1e-65b316f34886",
+        "bounding_box": true,
+        "clean_copy": true,
+        "crop": false,
+        "enabled": false,
+        "height": 0,
+        "quality": 70,
+        "retain": {
+          "mode": "motion",
+          "default": 10
+        },
+        "timestamp": false,
+        "createdAt": "2023-02-07T13:51:45.000Z",
+        "updatedAt": "2023-02-07T13:51:45.000Z",
+        "cameraId": "58675681-42f5-48f9-b67a-5e2d8d0f86c3"
+      },
+      "detect": {
+        "id": "37ead369-e41c-485b-91ce-32cfdb37dcd1",
+        "width": 1280,
+        "height": 720,
+        "fps": 5,
+        "enabled": true,
+        "max_disappeared": 25,
+        "stationary": {
+          "interval": 0,
+          "threshold": 50,
+          "max_frames": {
+            "default": 3000
+          }
+        },
+        "createdAt": "2023-02-07T13:51:45.000Z",
+        "updatedAt": "2023-02-07T13:51:45.000Z",
+        "cameraId": "58675681-42f5-48f9-b67a-5e2d8d0f86c3"
+      },
+      "objects": {
+        "id": "84c47f6a-8d9d-465c-90c6-515d848cb514",
+        "track": ["person"],
+        "createdAt": "2023-02-07T13:51:45.000Z",
+        "updatedAt": "2023-02-07T13:51:45.000Z",
+        "cameraId": "58675681-42f5-48f9-b67a-5e2d8d0f86c3"
+      }
+    }
+  ]
+}

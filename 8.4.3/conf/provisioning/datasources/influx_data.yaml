@@ -1,0 +1,10 @@
+apiVersion: 1
+datasources:
+- name: influx_data
+  type: influxdb
+  isDefault: true
+  access: proxy
+  database: sorba_sde
+  url: http://localhost:8086
+  jsonData:
+    httpMode: GET

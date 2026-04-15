@@ -1,0 +1,16 @@
+Package: sorba-dashboard-ui
+Version: 8.4.3-9
+License: AGPLv3
+Vendor: Grafana
+Architecture: amd64
+Maintainer: mfernandez@sorba.ai
+Installed-Size: 243668
+Depends: adduser, libfontconfig1
+Section: default
+Priority: extra
+Homepage: https://github.com/sorbotics/dashboard-ui
+Description: SORBA dashboard UI
+ Modified Grafana-based dashboard UI for the SORBA platform.
+ This package includes a modified version of Grafana licensed under AGPLv3.
+ Corresponding source code is available at:
+ https://github.com/sorbotics/dashboard-ui

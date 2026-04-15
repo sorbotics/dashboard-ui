@@ -1,0 +1,34 @@
+apiVersion: 1
+datasources:
+  - access: proxy
+    database: sorba_ml
+    jsonData:
+      httpMode: GET
+    name: sorba_ml
+    uid: PED5F9B837858F282
+    type: influxdb
+    url: http://127.0.0.1:8086
+  - access: proxy
+    database: sorba_sde
+    jsonData:
+      httpMode: GET
+    name: hot-data
+    uid: P13EEED571DAD0984
+    isDefault: true
+    type: influxdb
+    url: http://127.0.0.1:8086
+  - database: ml_trainer
+    jsonData:
+      connMaxLifetime: 14400
+      maxIdleConns: 2
+      maxOpenConns: 0
+    name: sorba_ml_mysql
+    uid: P0FF082228D7E9F46
+    secureJsonData:
+      password: sbrQp10
+    type: mysql
+    url: 127.0.0.1:3306
+    user: root
+deleteDatasources:
+  - name: Prometheus
+  - name: InfluxDB
