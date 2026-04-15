@@ -136,6 +136,7 @@ jobs:
       IMAGE_NAME: sorbotics/dashboard/dashboard-ui/main
       DOCKER_CONTEXT_DIR: .
       DOCKERFILE_NAME: Dockerfile
+      DOCKER_BUILD_SUMMARY: false
 
     steps:
       - name: Checkout repository
@@ -214,6 +215,8 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: dist
+          pattern: dashboard-*
+          merge-multiple: true
 
       - name: Generate global checksums
         run: |
