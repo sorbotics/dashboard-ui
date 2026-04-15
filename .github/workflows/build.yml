@@ -68,6 +68,13 @@ jobs:
           path: "*.deb"
           if-no-files-found: error
 
+      - name: Upload packages to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            *.deb
+
   build-rpm:
     runs-on: ubuntu-22.04
 
@@ -124,6 +131,13 @@ jobs:
           name: dashboard-rpm-package
           path: "*.rpm"
           if-no-files-found: error
+
+      - name: Upload packages to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            *.rpm
 
   docker-build:
     runs-on: ubuntu-22.04
