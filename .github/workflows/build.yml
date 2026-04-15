@@ -233,3 +233,34 @@ jobs:
             dist/**/*.deb
             dist/**/*.rpm
             dist/checksums.txt
+          generate_release_notes: false
+          body: |
+            ## Packages
+
+            This release includes:
+            - Debian package (`.deb`)
+            - RPM package (`.rpm`)
+            - `checksums.txt` with SHA256 hashes
+
+            ### Install on Debian/Ubuntu
+            ```bash
+            VERSION="${GITHUB_REF_NAME#v}"
+            curl -fL -o /tmp/sorba-dashboard-ui_${VERSION}_amd64.deb \
+              https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/sorba-dashboard-ui_${VERSION}_amd64.deb
+            sudo apt update
+            sudo apt install -y /tmp/sorba-dashboard-ui_${VERSION}_amd64.deb
+            ```
+
+            ### Install on RHEL9
+            ```bash
+            VERSION="${GITHUB_REF_NAME#v}"
+            curl -fL -o /tmp/sorba-dashboard-ui-${VERSION}.rpm \
+              https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/sorba-dashboard-ui-${VERSION}.el9.x86_64.rpm
+            sudo dnf install -y /tmp/sorba-dashboard-ui-${VERSION}.rpm
+            ```
+
+            ### Verify integrity
+            ```bash
+            curl -fL -O https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/checksums.txt
+            sha256sum -c checksums.txt
+            ```
