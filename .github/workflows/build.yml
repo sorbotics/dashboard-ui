@@ -100,7 +100,7 @@ jobs:
       - name: Validate required files
         run: |
           set -eux
-          test -f rpm-build.sh
+          test -f rpm_build.sh
           test -f version.txt
           test -d 8.4.3
           test -d package/RPMBUILD
@@ -108,12 +108,12 @@ jobs:
           test -f package/RPMBUILD/SPECS/sorba-dashboard-ui.spec
 
       - name: Make build script executable
-        run: chmod +x rpm-build.sh
+        run: chmod +x rpm_build.sh
 
       - name: Build RPM package
         run: |
           set -euxo pipefail
-          ./rpm-build.sh
+          ./rpm_build.sh
 
       - name: List generated RPMs
         run: ls -lah *.rpm
