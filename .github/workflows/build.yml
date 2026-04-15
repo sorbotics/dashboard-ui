@@ -1,0 +1,206 @@
+name: Build Packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      push_images:
+        description: "Push Docker image to ACR"
+        required: true
+        default: "false"
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-deb:
+    runs-on: ubuntu-22.04
+
+    env:
+      CI: "true"
+      CI_PROJECT_DIR: ${{ github.workspace }}
+      CI_COMMIT_SHA: ${{ github.sha }}
+      CI_COMMIT_REF_NAME: ${{ github.ref_name }}
+      CI_COMMIT_TAG: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+      CI_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      CI_PROJECT_NAME: ${{ github.event.repository.name }}
+      CI_PROJECT_PATH: ${{ github.repository }}
+      CI_PROJECT_URL: ${{ github.server_url }}/${{ github.repository }}
+      HOME: /home/runner
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install Debian packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev fakeroot jq git
+
+      - name: Validate required files
+        run: |
+          set -e
+          test -f deb_build.sh
+          test -f version.txt
+          test -d package/DEBIAN
+          test -d package/files
+
+      - name: Ensure build script is executable
+        run: chmod +x deb_build.sh
+
+      - name: Build Debian package
+        env:
+          CI_PROJECT_DIR: ${{ github.workspace }}
+          HOME: /home/runner
+        run: ./deb_build.sh
+
+      - name: List generated packages
+        run: ls -lah *.deb
+
+      - name: Upload Debian package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard-deb-package
+          path: "*.deb"
+          if-no-files-found: error
+
+  build-rpm:
+    runs-on: ubuntu-22.04
+
+    container:
+      image: registry.access.redhat.com/ubi9/nodejs-18:latest
+
+    env:
+      CI: "true"
+      CI_PROJECT_DIR: ${{ github.workspace }}
+      CI_COMMIT_SHA: ${{ github.sha }}
+      CI_COMMIT_REF_NAME: ${{ github.ref_name }}
+      CI_COMMIT_TAG: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+      CI_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      CI_PROJECT_NAME: ${{ github.event.repository.name }}
+      CI_PROJECT_PATH: ${{ github.repository }}
+      CI_PROJECT_URL: ${{ github.server_url }}/${{ github.repository }}
+      HOME: /github/home
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install RPM build dependencies
+        run: |
+          yum --disableplugin=subscription-manager install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm \
+            && yum update -y \
+            && yum --disableplugin=subscription-manager install -y openssh-clients rpmlint rpm-build dpkg fakeroot jq
+
+      - name: Validate required files
+        run: |
+          set -eux
+          test -f rpm-build.sh
+          test -f version.txt
+          test -d 8.4.3
+          test -d package/RPMBUILD
+          test -d package/files
+          test -f package/RPMBUILD/SPECS/sorba-dashboard-ui.spec
+
+      - name: Make build script executable
+        run: chmod +x rpm-build.sh
+
+      - name: Build RPM package
+        run: |
+          set -euxo pipefail
+          ./rpm-build.sh
+
+      - name: List generated RPMs
+        run: ls -lah *.rpm
+
+      - name: Upload RPM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard-rpm-package
+          path: "*.rpm"
+          if-no-files-found: error
+
+  docker-build:
+    runs-on: ubuntu-22.04
+
+    permissions:
+      contents: read
+
+    env:
+      REGISTRY: ${{ secrets.ACR_REGISTRY_NAME }}.azurecr.io
+      IMAGE_NAME: sorbotics/dashboard/dashboard-ui/main
+      DOCKER_CONTEXT_DIR: .
+      DOCKERFILE_NAME: Dockerfile
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read version
+        id: version
+        shell: bash
+        run: |
+          if [[ -f version.txt ]]; then
+            VERSION="$(tr -d '\n' < version.txt)"
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Define image repository
+        id: image
+        shell: bash
+        run: |
+          IMAGE_REPO="${REGISTRY}/${IMAGE_NAME}"
+          echo "repo=$IMAGE_REPO" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Azure Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.ACR_TOKEN_NAME }}
+          password: ${{ secrets.ACR_TOKEN }}
+
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.image.outputs.repo }}
+          tags: |
+            type=sha,format=short
+            type=raw,value=${{ steps.version.outputs.version }},enable=${{ steps.version.outputs.version != '' }}
+            type=ref,event=tag
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/') || github.ref_name == 'main' }}
+          labels: |
+            org.opencontainers.image.vendor=SORBOTICS
+            org.opencontainers.image.authors=SORBOTICS <support@sorba.ai>
+            org.opencontainers.image.url=https://www.sorbotics.com
+            org.opencontainers.image.documentation=https://www.sorbotics.com
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.DOCKER_CONTEXT_DIR }}
+          file: ${{ env.DOCKER_CONTEXT_DIR }}/${{ env.DOCKERFILE_NAME }}
+          push: ${{ startsWith(github.ref, 'refs/tags/') || inputs.push_images == 'true' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ steps.version.outputs.version }}
+
+      - name: Show published tags
+        shell: bash
+        run: |
+          echo "Published images:"
+          echo "${{ steps.meta.outputs.tags }}"

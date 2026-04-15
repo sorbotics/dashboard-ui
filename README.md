@@ -1,46 +1,55 @@
-# Building Grafana from source
-This guide will help you obtain grafana for operation in the dev environment. Grafana is sent with its own backend server required; # Also completely open source. It is written in Go and has a complete HTTP API.
+# SORBA Dashboard UI
 
-# Dependencies
-Go (Latest Stable)
-Git
-NodeJS LTS
+This repository contains a customized version of Grafana used as part of the Sorbotics platform.
 
-# Get Code
-Create a directory for the project and set your path accordingly (or use the default Go workspace directory: 
-https://golang.org/doc/code.html#GOPATH). Then download and install Grafana into your $GOPATH directory:
+## Overview
 
-export GOPATH=`pwd`
-go get github.com/grafana/grafana
+- Based on Grafana 8.4.3
+- Includes custom UI modifications and integrations
+- Distributed as:
+  - Debian package (.deb)
+  - Red Hat package (.rpm)
+  - Docker image
 
-# Building the backend
-cd $GOPATH/src/github.com/grafana/grafana
-go run build.go setup
-go run build.go build              # (or 'go build ./pkg/cmd/grafana-server')
+## License
 
-# Update Frontend with the sorba changes:
-cd $GOPATH/src
-mkdir gitlab.sorbasoft.net
-cd gitlab.sorbasoft.net/
-mkdir sorbotics
-cd sorbotics/
-git clone https://gitlab.sorbasoft.net/sorbotics/dashboard/dashboard-ui.git
-cd dashboard-ui/
-cp -r public/ $GOPATH/src/github.com/grafana/grafana
-cd $GOPATH/src/github.com/grafana/grafana
+This project includes a modified version of Grafana, which is licensed under the GNU Affero General Public License v3 (AGPLv3).
 
-# Build the Frontend Assets
-For this you need nodejs (v.6+).
-npm install -g yarn
-yarn install --pure-lockfile
-yarn watch
+The complete corresponding source code for this distributed and deployed version is available in this repository:
+https://github.com/sorbotics/dashboard-ui
 
-# Running Grafana Locally
-You can run a local instance of Grafana by running:
-./bin/grafana-server
-Or, if you built the binary with go run build.go build, run ./bin/<os>-<architecture>/grafana-server
-If you built it with go build ., run ./grafana
-Open grafana in your browser (default http://localhost:3000) and login with admin user (default user/pass = admin/admin).
+This project is not affiliated with or endorsed by Grafana Labs.
 
-# Developing Grafana
-To add features, customize your config, etc, visit http://docs.grafana.org/project/building_from_source/
+## Repository Structure
+
+- `8.4.3/` — Grafana source base
+- `package/` — Packaging configuration (DEB and RPM)
+- `plugins/` — Custom plugins and build scripts
+- `deb_build.sh` — Debian package build script
+- `rpm-build.sh` — RPM package build script
+
+## Building Packages
+
+### Debian
+
+```bash
+./deb_build.sh
+```
+
+### RPM
+
+```bash
+./rpm_build.sh
+```
+
+### Docker Image
+
+The Docker image is built using GitHub Actions and published to Azure Container Registry (ACR).
+
+### CI/CD
+
+Builds are triggered on Git tags (`v*`) and can also be executed manually via GitHub Actions.
+
+## Disclaimer
+
+This is a fork of Grafana with custom modifications. It should not be confused with the official Grafana project.
