@@ -23,7 +23,6 @@ rm -rf /etc/grafana/provisioning/
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT
 tar xzf %{SOURCE0} -C %{buildroot}/
-# Quitar permisos de ejecucion de archivos sin shebang(#!/bin/bash)
 # find %{buildroot} -type f -exec grep -Il '^#!' {} + -exec chmod -x {} +
 
 %post
@@ -163,7 +162,7 @@ service nginx reload || true
 /usr/sbin/grafana-cli
 /usr/sbin/grafana-server
 /usr/sbin/start-grafana
-/usr/share/grafana/*
-/usr/share/doc/grafana/*
+/usr/share/sorba-dashboard-ui/*
+/usr/share/doc/sorba-dashboard-ui/*
 %defattr(-,root,root,-)
 %config(noreplace) /var/lib/grafana/plugins/*
