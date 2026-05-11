@@ -1,15 +1,16 @@
 %if 0%{?_version:1}
 %define version %{_version}
 %else
-%define version 8.4.4
+%define version 8.4.3
 %endif
 %{!?release: %define release 1}
 Name: sorba-dashboard-ui
 Version: %{version}
 Release: %{release}%{?dist}
-Summary: SORBA Grafana implementation
+Summary: SORBA Dashboard UI based on Grafana
 
-License: GPL
+License: AGPLv3
+URL: https://github.com/sorbotics/dashboard-ui
 Source0: files.tar.gz
 
 %description
@@ -164,6 +165,5 @@ service nginx reload || true
 /usr/sbin/start-grafana
 /usr/share/grafana/*
 /usr/share/doc/grafana/*
-/var/lib/grafana/plugins/*
 %defattr(-,root,root,-)
 %config(noreplace) /var/lib/grafana/plugins/*
