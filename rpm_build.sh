@@ -1,6 +1,6 @@
 #!/bin/sh
 
-GRAFANA_VERSION="8.4.4"
+GRAFANA_VERSION="8.4.3"
 
 SOURCE_RPM_DIR="$HOME/rpmbuild"
 
