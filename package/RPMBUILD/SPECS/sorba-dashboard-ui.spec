@@ -162,7 +162,8 @@ service nginx reload || true
 /usr/sbin/grafana-cli
 /usr/sbin/grafana-server
 /usr/sbin/start-grafana
-/usr/share/sorba-dashboard-ui/*
+/usr/share/grafana/*
+/usr/share/doc/grafana/*
 /usr/share/doc/sorba-dashboard-ui/*
 %defattr(-,root,root,-)
 %config(noreplace) /var/lib/grafana/plugins/*
