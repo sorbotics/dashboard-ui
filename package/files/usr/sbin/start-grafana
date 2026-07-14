@@ -23,4 +23,4 @@ export MYSQL_PASSWORD=${MYSQL_PASSWORD:-$DEFAULT_MYSQL_PASSWORD}
 export INFLUX_HOST=${INFLUX_HOST:-DEFAULT_INFLUX_HOST}
 export INFLUX_PORT=${INFLUX_PORT:-DEFAULT_INFLUX_PORT}
 
-exec /usr/sbin/grafana-server --homepath=$GRAFANA_HOME --config=$CONF_FILE --packaging=deb cfg:paths.provisioning=$PROVISIONING_CFG_DIR cfg:paths.data=$DATA_DIR cfg:paths.logs=$LOG_DIR cfg:paths.plugins=$PLUGINS_DIR cfg:database.host="$MYSQL_HOST:$MYSQL_PORT" cfg:database.user="$MYSQL_USERNAME" cfg:database.password="$MYSQL_PASSWORD"
+exec $GRAFANA_HOME/bin/grafana server --homepath=$GRAFANA_HOME --config=$CONF_FILE --packaging=deb cfg:paths.provisioning=$PROVISIONING_CFG_DIR cfg:paths.data=$DATA_DIR cfg:paths.logs=$LOG_DIR cfg:paths.plugins=$PLUGINS_DIR cfg:database.host="$MYSQL_HOST:$MYSQL_PORT" cfg:database.user="$MYSQL_USERNAME" cfg:database.password="$MYSQL_PASSWORD"
