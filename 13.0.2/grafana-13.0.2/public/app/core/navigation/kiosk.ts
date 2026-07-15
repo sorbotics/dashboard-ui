@@ -7,6 +7,7 @@ export function getKioskMode(queryParams: UrlQueryMap): KioskMode | null {
     //  legacy support
     case '1':
     case true:
+    case 'full':
       return KioskMode.Full;
     default:
       return null;

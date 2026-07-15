@@ -1,0 +1,32 @@
+{
+  "type": "panel",
+  "name": "Plotly panel",
+  "id": "ae3e-plotly-panel",
+
+  "info": {
+    "description": "Sorba fork of ae3e-plotly-panel converted to ESM for Grafana 13+. Renders any Plotly chart from any datasource. Includes a DataFrame-to-legacy shim so existing scripts using data.series[].fields[].values.buffer continue to work without modification.",
+    "author": {
+      "name": "Sorba"
+    },
+    "keywords": ["Plotly", "Sorba", "ML", "analytics"],
+    "logos": {
+      "small": "img/plotly.svg",
+      "large": "img/plotly.svg"
+    },
+    "links": [
+      {"name": "Source repo", "url": "https://github.com/ae3e/ae3e-plotly-panel"},
+      {"name": "Sorba dashboard-ui", "url": "https://github.com/sorbotics/dashboard-ui"}
+    ],
+    "screenshots": [
+      {"name": "Editor", "path": "img/editor.png"},
+      {"name": "Panel", "path": "img/panel.png"}
+    ],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+
+  "dependencies": {
+    "grafanaDependency": ">=12.0.0",
+    "plugins": []
+  }
+}
