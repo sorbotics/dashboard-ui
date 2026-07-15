@@ -1,49 +1,70 @@
-# Plotly Panel
+# ae3e-plotly-panel (Sorba fork)
 
-[![Marketplace](https://img.shields.io/badge/dynamic/json?logo=grafana&color=F47A20&label=marketplace&prefix=v&query=%24.items%5B%3F%28%40.slug%20%3D%3D%20%22ae3e-plotly-panel%22%29%5D.version&url=https%3A%2F%2Fgrafana.com%2Fapi%2Fplugins)](https://grafana.com/grafana/plugins/ae3e-plotly-panel)
-[![Downloads](https://img.shields.io/badge/dynamic/json?logo=grafana&color=F47A20&label=downloads&query=%24.items%5B%3F%28%40.slug%20%3D%3D%20%22ae3e-plotly-panel%22%29%5D.downloads&url=https%3A%2F%2Fgrafana.com%2Fapi%2Fplugins)](https://grafana.com/grafana/plugins/ae3e-plotly-panel)
+Sorba's fork of [ae3e-plotly-panel](https://github.com/ae3e/ae3e-plotly-panel) v0.5.0, rebuilt for Grafana 13+.
 
-[https://github.com/ae3e/ae3e-plotly-panel](https://github.com/ae3e/ae3e-plotly-panel)
+The original plugin is unmaintained (last release 2021-08-09) and incompatible with Grafana 13 (built for React 17 + old Grafana APIs). This fork:
 
-Render any kind of charts from any datasource with [Plotly](https://plotly.com/javascript/) (An open source javascript graphing library)
+- Replaces `react-plotly.js` (React 17 class component) with a custom `PlotlyChart` function component that works with React 18/19
+- Outputs **AMD** format for Grafana's SystemJS plugin loader
+- Includes a **DataFrame-to-legacy shim** so existing scripts from the 8.4.3 era (using `data.series[].fields[].values.buffer`) work without modification
+- Preserves the original plugin `id` (`ae3e-plotly-panel`) so existing dashboard JSONs referencing `vizConfig.group = "ae3e-plotly-panel"` work as-is
 
-Unlike the [natel-plotly-panel](https://github.com/NatelEnergy/grafana-plotly-panel), this plugin is not limited to specific types of charts. But, on the other hand, the user interface is really rough in order to let users to set all options available in Plotly.
+## Prerequisites
 
-The *Data*, *Layout* and *Config* fields match the common parameters described in [Plotly's documentation](https://plotly.com/javascript/plotlyjs-function-reference/). They must be in JSON format.
+- Node.js 18+
+- Yarn
 
-Data provided by the datasource can be transformed via a user-defined script before to be injected in the Plotly chart. The script includes 2 arguments :
-- `data` : Data returns by the datasource
-- `variables` : Object that contains [Grafana's variables](https://grafana.com/docs/grafana/latest/variables/) available in the current dashboard (user variables and few global variables : `__from`, `__to`, `__interval` and `__interval_ms`). 
+## Build
 
-The script must return an object with one or more of the following properties : `data`, `layout`, `config` and `frames`.
+```bash
+cd plugins/ae3e-plotly-panel
+yarn install
+yarn build
+```
 
-example :
+Output: `dist/module.js` (AMD, ~4.5 MB, bundles Plotly) + `plugin.json` + images.
+
+## Development
+
+```bash
+yarn dev    # webpack watch + livereload
+```
+
+## Integration with dashboard-ui build
+
+`deb_build_13.sh` calls `plugins/build-plugins.sh`, which iterates over `plugins/*/` and runs `yarn install && yarn build`. The resulting `dist/` is copied into `$SOURCE_GRAFANA_DIR/var/lib/grafana/plugins/ae3e-plotly-panel/` inside the `.deb`.
+
+## DataFrame-to-legacy shim
+
+Grafana 13 passes `DataFrame[]` to panels, where `fields[].values` is a `Vector<T>`. The original ae3e-plotly-panel v0.5.0 expected `data.series[].fields[].values.buffer` (a plain Array).
+
+The shim in `SimplePanel.tsx` converts Grafana 13's data format to the legacy shape, so existing scripts like:
+
 ```javascript
-let x  = data.series[0].fields[0].values.buffer
-let y  = data.series[0].fields[1].values.buffer
+let x = data.series[0].fields[0].values.buffer
+let y = data.series[0].fields[1].values.buffer
+```
 
-let serie = {
-    x : x,
-    y : y,
-    name : variables.project //where project is the name of a Grafana's variable 
-}
+continue to work without modification.
 
-return {
-    data : [serie],
-    config : {
-        displayModeBar: false
-    }
-}
-````
+## kiosk=full patches
 
-Object returned by the script and JSON provided in the  *Data*, *Layout* and *Config* fields will be merged (deep merge).
+Grafana 13 dropped support for `kiosk=full` (only `kiosk=1`/`kiosk=true` recognized). Two patches are required:
 
-If no script is provided, the panel will use only *Data*, *Layout* and *Config* fields.
+1. `13.0.2/grafana-13.0.2/public/app/core/navigation/kiosk.ts` — add `case 'full':` to the switch
+2. `13.0.2/grafana-13.0.2/public/build/2271*.js` (and `-react19*` variants) — patch minified JS: replace `case"1":case!0:return` with `case"1":case!0:case"full":return`
 
-Plotly panel editor :
+Re-patch after any `yarn build` of Grafana frontend.
 
-![Editor](https://raw.githubusercontent.com//ae3e/ae3e-plotly-panel/master/src/img/editor.png)
+## unsigned plugins
 
-Example of charts :
+Add to `/etc/grafana/grafana.ini`:
 
-![Panel](https://raw.githubusercontent.com//ae3e/ae3e-plotly-panel/master/src/img/panel.png)
+```ini
+[plugins]
+allow_loading_unsigned_plugins = ae3e-plotly-panel,sorba-video-panel,isaozler-paretochart-panel,natel-discrete-panel,yesoreyeram-boomtable-panel
+```
+
+## License
+
+Apache-2.0 (same as original).
