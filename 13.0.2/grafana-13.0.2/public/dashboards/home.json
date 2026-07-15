@@ -2,74 +2,34 @@
   "links": [],
   "panels": [
     {
-      "datasource": null,
-      "gridPos": {
-        "h": 3,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
       "id": 1,
-      "title": "",
-      "transparent": false,
-      "type": "welcome"
+      "type": "text",
+      "title": "Welcome to Sorba Dashboard",
+      "gridPos": { "h": 3, "w": 24, "x": 0, "y": 0 },
+      "options": { "mode": "html", "content": "<div style=\"padding:8px 4px;\"><img src=\"/dashboard/public/img/sorba-logo.svg\" style=\"height:32px;vertical-align:middle;\"/> <span style=\"font-size:18px;margin-left:12px;\">Welcome to the Sorba Dashboard</span></div>" }
     },
     {
-      "datasource": null,
-      "folderId": 0,
-      "gridPos": {
-        "h": 15,
-        "w": 12,
-        "x": 0,
-        "y": 4
-      },
+      "id": 2,
+      "type": "text",
+      "title": "Suggested dashboards",
+      "gridPos": { "h": 15, "w": 16, "x": 0, "y": 4 },
+      "options": { "mode": "html", "content": "<div style=\"padding:8px;\"><h4>Get started</h4><ul style=\"line-height:1.9\"><li><a href=\"/dashboard/dashboards\">All dashboards</a></li><li><a href=\"/dashboard/dashboards?query=influx_data\">Hot data</a></li><li><a href=\"/dashboard/dashboards?query=sorba_ml\">ML metrics</a></li></ul><p style=\"color:#888;margin-top:16px;\">Tip: use the star icon on any dashboard to add it to your shortcuts.</p></div>" }
+    },
+    {
       "id": 3,
-      "links": [],
-      "options": {
-        "showStarred": true,
-        "showRecentlyViewed": true,
-        "showSearch": false,
-        "showHeadings": true,
-        "folderId": 0,
-        "maxItems": 30,
-        "tags": [],
-        "query": ""
-      },
-      "title": "Dashboards",
-      "type": "dashlist"
-    },
-    {
-      "datasource": null,
-      "gridPos": {
-        "h": 15,
-        "w": 12,
-        "x": 12,
-        "y": 4
-      },
-      "id": 4,
-      "links": [],
-      "options": {
-        "feedUrl": "https://grafana.com/blog/news.xml"
-      },
-      "title": "Latest from the blog",
-      "type": "news"
+      "type": "text",
+      "title": "About",
+      "gridPos": { "h": 15, "w": 8, "x": 16, "y": 4 },
+      "options": { "mode": "html", "content": "<div style=\"width:96%;margin:30px auto;\"><img src=\"/dashboard/public/img/sorba-logo.svg\"><br/>SORBA.ai is an industrial AI and AutoML SaaS platform that helps:<br/><br/><ul><li>reduce energy</li><li>prevent unplanned downtime</li><li>increase productivity</li></ul>through the democratization of Auto-AI software solutions without ever writing a single line of code.<div style=\"margin-top:30px\"><ul><li><a href=\"https://www.sorba.ai/\">About Us</a></li><li><a href=\"https://www.sorba.ai/knowledge-base\">Knowledge Base</a></li></ul></div><div style=\"margin-top:30px;\"><h5 style=\"font-weight:bold;margin-bottom:20px;\">Contact:</h5><div><div style=\"inline-block\"><i class=\"gicon gicon-home\"></i></div><div style=\"display:inline-block;margin-top:-20px;margin-left:30px\">7077 Bonneval Road, Suite 330<br/>Jacksonville, FL 32216</div><div style=\"margin-top:20px;margin-left:30px;\"><a href=\"mailto:info@sorbotics.ai\">info@sorbotics.ai</a><br/><a href=\"https://sorba.ai/\">sorba.ai</a></div></div></div><div style=\"margin-top:40px;padding-top:20px;border-top:1px solid #ccc;\"><h5 style=\"font-weight:bold;\">Open Source Notice</h5><p style=\"font-size:13px;\">This service includes a modified version of Grafana, licensed under the GNU Affero General Public License v3 (AGPLv3).</p><p style=\"font-size:13px;\">The complete corresponding source code for this deployed version is available at:<br/><a href=\"https://github.com/sorbotics/dashboard-ui\" target=\"_blank\">https://github.com/sorbotics/dashboard-ui</a></p></div></div>" }
     }
   ],
-  "schemaVersion": 22,
+  "schemaVersion": 39,
   "tags": [],
-  "templating": {
-    "list": []
-  },
-  "time": {
-    "from": "now-6h",
-    "to": "now"
-  },
-  "editable": false,
-  "timepicker": {
-    "hidden": true,
-    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"],
-    "type": "timepicker"
-  },
+  "templating": { "list": [] },
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": { "hidden": true, "refresh_intervals": ["5s","10s","30s","1m","5m","15m","30m","1h","2h","1d"], "type": "timepicker" },
   "timezone": "browser",
-  "title": "Home"
+  "title": "Home",
+  "uid": "sorba-home",
+  "editable": false
 }

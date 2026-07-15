@@ -58,8 +58,13 @@ $2
 EOM
 }
 
-case "$1" in
+ case "$1" in
 	configure)
+	# Ensure the Grafana MySQL database exists (Grafana does not auto-create it).
+	# Uses the same defaults as start-grafana; safe to re-run (CREATE DATABASE IF NOT EXISTS).
+	mysql -h "${MYSQL_HOST:-127.0.0.1}" -P "${MYSQL_PORT:-3306}" -u "${MYSQL_USER:-root}" -p"${MYSQL_PASSWORD:-sbrQp10}" \
+		-e "CREATE DATABASE IF NOT EXISTS \`dashboard\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null || true
+
 	[ -z "$GRAFANA_USER" ] && GRAFANA_USER="grafana"
 	[ -z "$GRAFANA_GROUP" ] && GRAFANA_GROUP="grafana"
 	if ! getent group "$GRAFANA_GROUP" > /dev/null 2>&1 ; then
@@ -79,7 +84,9 @@ case "$1" in
   # copy user config files
   if [ ! -f $CONF_FILE ]; then
     mkdir -p $CONF_DIR
-    if [ -f /usr/share/grafana/conf/grafana.ini ]; then
+    if [ -f /usr/share/grafana/conf/custom.ini ]; then
+      cp /usr/share/grafana/conf/custom.ini $CONF_FILE
+    elif [ -f /usr/share/grafana/conf/grafana.ini ]; then
       cp /usr/share/grafana/conf/grafana.ini $CONF_FILE
     elif [ -f /usr/share/grafana/conf/defaults.ini ]; then
       cp /usr/share/grafana/conf/defaults.ini $CONF_FILE

@@ -44,6 +44,48 @@ cp -r "${CI_PROJECT_DIR}/${GRAFANA_SRC}/public/locales" "${GRAFANA_HOME}/public/
 cp -r "${CI_PROJECT_DIR}/${GRAFANA_SRC}/public/emails" "${GRAFANA_HOME}/public/" 2>/dev/null || true
 cp -r "${CI_PROJECT_DIR}/${GRAFANA_SRC}/public/dashboards" "${GRAFANA_HOME}/public/" 2>/dev/null || true
 
+# 4b. Built-in plugin metadata for panel and core datasource types (required for
+#     the server-side plugin store to register text/influxdb/etc. in
+#     /api/frontend/settings).
+#     - Skips duplicate */dist/plugin.json build copies.
+#     - Skips workspace plugins (mysql, postgres, cloudwatch, loki, etc.) which
+#       have a separate frontend module in dist/ and a Go backend (gpx_*)
+#       that aren't bundled here. They must be installed via the UI or
+#       `grafana-cli plugins install <id>`, otherwise the in-tree plugin.json
+#       would shadow the working installed plugin and produce a broken
+#       config editor (no module.js → "Could not load plugin").
+WORKSPACE_PLUGINS="azuremonitor cloud-monitoring cloudwatch grafana-postgresql-datasource grafana-pyroscope-datasource grafana-testdata-datasource jaeger loki mssql parca tempo zipkin"
+echo "[4b/7] Copying built-in plugin metadata..."
+find "${CI_PROJECT_DIR}/${GRAFANA_SRC}/public/app/plugins" -name plugin.json -not -path "*/dist/*" | while IFS= read -r plugin_json; do
+  rel_path="${plugin_json#${CI_PROJECT_DIR}/${GRAFANA_SRC}/public/app/plugins/}"
+  case "$rel_path" in
+    */dist/plugin.json) continue ;;
+  esac
+  plugin_name="$(basename "$(dirname "$rel_path")")"
+  case " $WORKSPACE_PLUGINS " in
+    *" $plugin_name "*) continue ;;
+  esac
+  dest_dir="${GRAFANA_HOME}/public/app/plugins/$(dirname "$rel_path")"
+  mkdir -p "$dest_dir"
+  cp "$plugin_json" "$dest_dir/"
+done
+
+# 4c. Built-in plugin logos (img/) copied to public/plugins/<name>/img/ — the path
+#     the BaseURL exposed in /api/frontend/settings points to. Skips workspace
+#     plugins (their icons come from the installed plugin, not the in-tree copy).
+echo "[4c/7] Copying built-in plugin logos..."
+for plugin_dir in "${CI_PROJECT_DIR}/${GRAFANA_SRC}/public/app/plugins/datasource"/*/ \
+                  "${CI_PROJECT_DIR}/${GRAFANA_SRC}/public/app/plugins/panel"/*/; do
+  name=$(basename "$plugin_dir")
+  case " $WORKSPACE_PLUGINS " in
+    *" $name "*) continue ;;
+  esac
+  if [ -d "${plugin_dir}img" ]; then
+    mkdir -p "${GRAFANA_HOME}/public/plugins/${name}/img"
+    cp -r "${plugin_dir}img/." "${GRAFANA_HOME}/public/plugins/${name}/img/"
+  fi
+done
+
 # 5. Configuration files
 echo "[5/7] Copying configuration..."
 mkdir -p "${GRAFANA_HOME}/conf"
@@ -61,8 +103,15 @@ cp "${CI_PROJECT_DIR}/${GRAFANA_SRC}/conf/provisioning/datasources/influx_data.y
 # 6. Plugins
 echo "[6/7] Copying plugins..."
 cp -r "${CI_PROJECT_DIR}/plugins/." "${SOURCE_PLUGINS_DIR}/"
+# Tell build-plugins.sh where to drop built plugin dists (the staging dir).
+# Without this, the env var is empty and plugins end up under /var/lib/grafana/plugins/
+# (system path) instead of $SOURCE_DEB_DIR/var/lib/grafana/plugins/ (staging path).
+SOURCE_GRAFANA_DIR="$SOURCE_DEB_DIR"
+export SOURCE_GRAFANA_DIR
+# build-plugins.sh iterates plugins/*/ relative to its cwd, so cd there first
 if [ -f "${SOURCE_PLUGINS_DIR}/build-plugins.sh" ]; then
-  chmod +x $SOURCE_PLUGINS_DIR/build-plugins.sh && $SOURCE_PLUGINS_DIR/build-plugins.sh
+  chmod +x $SOURCE_PLUGINS_DIR/build-plugins.sh
+  ( cd "$SOURCE_PLUGINS_DIR" && ./build-plugins.sh )
 fi
 
 # 7. Version and permissions

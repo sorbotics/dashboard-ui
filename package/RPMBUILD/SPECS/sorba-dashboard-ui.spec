@@ -26,6 +26,10 @@ tar xzf %{SOURCE0} -C %{buildroot}/
 # find %{buildroot} -type f -exec grep -Il '^#!' {} + -exec chmod -x {} +
 
 %post
+# Ensure the Grafana MySQL database exists (Grafana does not auto-create it).
+mysql -h "${MYSQL_HOST:-127.0.0.1}" -P "${MYSQL_PORT:-3306}" -u "${MYSQL_USER:-root}" -p"${MYSQL_PASSWORD:-sbrQp10}" \
+	-e "CREATE DATABASE IF NOT EXISTS \`dashboard\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null || true
+
 IS_UPGRADE=false
 
 SUPERVISOR_CONF_FILE="/etc/supervisor/conf.d/dashboard-ui.conf"
@@ -96,7 +100,9 @@ chmod +x /usr/sbin/grafana-server
 # copy user config files
 if [ ! -f $CONF_FILE ]; then
   mkdir -p $CONF_DIR
-  if [ -f /usr/share/grafana/conf/grafana.ini ]; then
+  if [ -f /usr/share/grafana/conf/custom.ini ]; then
+    cp /usr/share/grafana/conf/custom.ini $CONF_FILE
+  elif [ -f /usr/share/grafana/conf/grafana.ini ]; then
     cp /usr/share/grafana/conf/grafana.ini $CONF_FILE
   elif [ -f /usr/share/grafana/conf/defaults.ini ]; then
     cp /usr/share/grafana/conf/defaults.ini $CONF_FILE
