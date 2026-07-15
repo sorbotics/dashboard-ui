@@ -58,6 +58,45 @@ $2
 EOM
 }
 
+# Grafana 13+ refuses to load unsigned plugins by default. Ensure our
+# bundled plugins are allowed whether this is a fresh install or an upgrade.
+ensure_unsigned_plugins_allowed () {
+  local conf_file="$1"
+  local plugins_to_allow="ae3e-plotly-panel sorba-video-panel isaozler-paretochart-panel natel-discrete-panel yesoreyeram-boomtable-panel"
+
+  [ -f "$conf_file" ] || return 0
+
+  # Ensure a [plugins] section exists
+  if ! grep -q "^\[plugins\]" "$conf_file"; then
+    echo "" >> "$conf_file"
+    echo "[plugins]" >> "$conf_file"
+  fi
+
+  # Read current value (last occurrence wins, strip spaces)
+  local current_value
+  current_value=$(grep -E "^allow_loading_unsigned_plugins\s*=" "$conf_file" | tail -1 | sed 's/^allow_loading_unsigned_plugins\s*=\s*//' | tr -d ' ')
+
+  local new_value="$current_value"
+  for plugin in $plugins_to_allow; do
+    case ",$current_value," in
+      *",$plugin,"*) ;;  # already present
+      *)
+        if [ -z "$new_value" ]; then
+          new_value="$plugin"
+        else
+          new_value="$new_value,$plugin"
+        fi
+        ;;
+    esac
+  done
+
+  if grep -qE "^allow_loading_unsigned_plugins\s*=" "$conf_file"; then
+    sed -i "s/^allow_loading_unsigned_plugins\s*=.*/allow_loading_unsigned_plugins = $new_value/" "$conf_file"
+  else
+    sed -i "/^\[plugins\]/a allow_loading_unsigned_plugins = $new_value" "$conf_file"
+  fi
+}
+
  case "$1" in
 	configure)
 	# Ensure the Grafana MySQL database exists (Grafana does not auto-create it).
@@ -95,6 +134,9 @@ EOM
     fi
     # cp /usr/share/grafana/conf/ldap.toml /etc/grafana/ldap.toml
   fi
+
+  # Allow our bundled unsigned plugins to load on Grafana 13+
+  ensure_unsigned_plugins_allowed "$CONF_FILE"
 
   # if [ ! -d $PROVISIONING_CFG_DIR ]; then
   #   mkdir -p $PROVISIONING_CFG_DIR/dashboards $PROVISIONING_CFG_DIR/datasources

@@ -1,9 +1,10 @@
 /*
- * Sorba Plotly panel — webpack 5 config for Grafana 13 (ESM output)
- * Adapted from the create-plugin scaffold (sorba-video-panel) but with:
- *   - output.library.type = 'module' (ESM, not AMD)
- *   - externals include only what Grafana 13 provides
- *   - no ForkTsChecker (kept simple for now)
+ * Sorba Plotly panel — webpack 5 config for Grafana 13 (AMD output)
+ *
+ * Grafana 13 loads external plugins via SystemJS with the AMD extra enabled,
+ * so the bundle must be AMD (not ESM). Core Grafana/React dependencies are
+ * kept external and resolved through Grafana's shared dependency import map.
+ * Plotly and other non-core libraries are bundled into the plugin.
  */
 
 import CopyWebpackPlugin from 'copy-webpack-plugin';
@@ -28,26 +29,46 @@ const config = async (env): Promise<Configuration> => ({
 
   entry: await getEntries(),
 
-  experiments: {
-    outputModule: true,
-  },
+  // Grafana exposes these via its shared dependency import map. Keep them
+  // external so the plugin uses the same React/Grafana instances as core.
+  externals: [
+    'lodash',
+    'jquery',
+    'moment',
+    'slate',
+    'emotion',
+    'prismjs',
+    'slate-plain-serializer',
+    '@grafana/slate-react',
+    'react',
+    'react-dom',
+    'react/jsx-runtime',
+    'react-redux',
+    'redux',
+    'rxjs',
+    'react-router',
+    'react-router-dom',
+    'd3',
+    'angular',
+    '@grafana/ui',
+    '@grafana/runtime',
+    '@grafana/data',
+    '@emotion/react',
+    '@emotion/css',
 
-  externalsType: 'module',
+    // Handle legacy SDK imports that use the "grafana/" prefix
+    ({ request }, callback) => {
+      const prefix = 'grafana/';
+      const hasPrefix = (request: string) => request.indexOf(prefix) === 0;
+      const stripPrefix = (request: string) => request.substr(prefix.length);
 
-  externals: {
-    react: 'module react',
-    'react-dom': 'module react-dom',
-    'react/jsx-runtime': 'module react/jsx-runtime',
-    '@emotion/react': 'module @emotion/react',
-    '@emotion/css': 'module @emotion/css',
-    'plotly.js-dist-min': 'module plotly.js-dist-min',
-    'react-plotly.js': 'module react-plotly.js',
-    'react-virtualized-auto-sizer': 'module react-virtualized-auto-sizer',
-    '@grafana/data': 'module @grafana/data',
-    '@grafana/runtime': 'module @grafana/runtime',
-    '@grafana/ui': 'module @grafana/ui',
-    'lodash': 'module lodash',
-  },
+      if (request && hasPrefix(request)) {
+        return callback(undefined, stripPrefix(request));
+      }
+
+      callback();
+    },
+  ],
 
   mode: env.production ? 'production' : 'development',
 
@@ -93,10 +114,9 @@ const config = async (env): Promise<Configuration> => ({
     clean: true,
     filename: '[name].js',
     chunkFilename: '[name].js',
-    library: { type: 'module' },
-    module: true,
-    chunkFormat: 'module',
-    environment: { module: true, dynamicImport: true },
+    library: {
+      type: 'amd',
+    },
     path: path.resolve(process.cwd(), DIST_DIR),
     publicPath: '/',
   },
@@ -128,6 +148,11 @@ const config = async (env): Promise<Configuration> => ({
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
     modules: [path.resolve(process.cwd(), 'src'), 'node_modules'],
+    alias: {
+      // react-plotly.js imports 'plotly.js/dist/plotly' as a peer dep.
+      // We ship plotly.js-dist-min instead, so redirect that exact path.
+      'plotly.js/dist/plotly': 'plotly.js-dist-min/plotly.min.js',
+    },
   },
 });
 
