@@ -33,6 +33,20 @@ This project is not affiliated with or endorsed by Grafana Labs.
 ### Debian
 
 ```bash
+TARGET_ARCH=amd64 ./deb_build.sh
+TARGET_ARCH=arm64 ./deb_build.sh
+```
+
+The Debian build script downloads the official Grafana `8.4.3` release tarball and extracts `grafana-server` during packaging.
+
+- `TARGET_ARCH` accepts `amd64` or `arm64` and updates the `.deb` metadata accordingly.
+- By default it uses Grafana OSS assets from `dl.grafana.com`.
+- You can switch to enterprise assets with `GRAFANA_DOWNLOAD_CHANNEL=enterprise`.
+- You can override the expected SHA256 with `GRAFANA_TARBALL_SHA256` if you need to pin a verified checksum externally.
+
+```bash
+TARGET_ARCH=arm64 \
+GRAFANA_DOWNLOAD_CHANNEL=enterprise \
 ./deb_build.sh
 ```
 

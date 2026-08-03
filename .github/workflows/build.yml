@@ -12,7 +12,39 @@ on:
       - 'v*'
 
 jobs:
-  build-deb:
+  prepare:
+    name: Prepare build variables
+    runs-on: ubuntu-22.04
+
+    outputs:
+      tag: ${{ steps.build-vars.outputs.tag }}
+      version: ${{ steps.build-vars.outputs.version }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Resolve tag and version
+        id: build-vars
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE_VERSION="$(tr -d '\r\n' < version.txt)"
+
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            TAG="$GITHUB_REF_NAME"
+            VERSION="${TAG#v}"
+          else
+            TAG="v${FILE_VERSION}"
+            VERSION="$FILE_VERSION"
+          fi
+
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+  build-deb-amd64:
+    name: Build Debian package (amd64)
+    needs: prepare
     runs-on: ubuntu-22.04
 
     env:
@@ -20,12 +52,12 @@ jobs:
       CI_PROJECT_DIR: ${{ github.workspace }}
       CI_COMMIT_SHA: ${{ github.sha }}
       CI_COMMIT_REF_NAME: ${{ github.ref_name }}
-      CI_COMMIT_TAG: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+      CI_COMMIT_TAG: ${{ needs.prepare.outputs.tag }}
       CI_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
       CI_PROJECT_NAME: ${{ github.event.repository.name }}
       CI_PROJECT_PATH: ${{ github.repository }}
       CI_PROJECT_URL: ${{ github.server_url }}/${{ github.repository }}
-      HOME: /home/runner
+      TARGET_ARCH: amd64
 
     steps:
       - name: Checkout repository
@@ -39,7 +71,7 @@ jobs:
       - name: Install Debian packaging tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y dpkg-dev fakeroot jq git
+          sudo apt-get install -y dpkg-dev fakeroot jq git curl
 
       - name: Validate required files
         run: |
@@ -53,9 +85,6 @@ jobs:
         run: chmod +x deb_build.sh
 
       - name: Build Debian package
-        env:
-          CI_PROJECT_DIR: ${{ github.workspace }}
-          HOME: /home/runner
         run: ./deb_build.sh
 
       - name: List generated packages
@@ -64,11 +93,71 @@ jobs:
       - name: Upload Debian package artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dashboard-deb-package
+          name: dashboard-deb-amd64
+          path: "*.deb"
+          if-no-files-found: error
+
+  build-deb-arm64:
+    name: Build Debian package (arm64)
+    needs: prepare
+    runs-on: ubuntu-22.04-arm
+
+    env:
+      CI: "true"
+      CI_PROJECT_DIR: ${{ github.workspace }}
+      CI_COMMIT_SHA: ${{ github.sha }}
+      CI_COMMIT_REF_NAME: ${{ github.ref_name }}
+      CI_COMMIT_TAG: ${{ needs.prepare.outputs.tag }}
+      CI_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      CI_PROJECT_NAME: ${{ github.event.repository.name }}
+      CI_PROJECT_PATH: ${{ github.repository }}
+      CI_PROJECT_URL: ${{ github.server_url }}/${{ github.repository }}
+      TARGET_ARCH: arm64
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Debian packaging tools
+        run: |
+          test "$(uname -m)" = "aarch64"
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev fakeroot jq git curl
+
+      - name: Validate required files
+        run: |
+          set -e
+          test -f deb_build.sh
+          test -f version.txt
+          test -d package/DEBIAN
+          test -d package/files
+
+      - name: Ensure build script is executable
+        run: chmod +x deb_build.sh
+
+      - name: Build Debian package
+        run: ./deb_build.sh
+
+      - name: List generated packages
+        run: |
+          ls -lah *.deb
+          test "$(dpkg-deb --field ./*.deb Architecture)" = "arm64"
+
+      - name: Upload Debian package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard-deb-arm64
           path: "*.deb"
           if-no-files-found: error
 
   build-rpm:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
+    needs: prepare
     runs-on: ubuntu-22.04
 
     container:
@@ -80,7 +169,7 @@ jobs:
       CI_PROJECT_DIR: ${{ github.workspace }}
       CI_COMMIT_SHA: ${{ github.sha }}
       CI_COMMIT_REF_NAME: ${{ github.ref_name }}
-      CI_COMMIT_TAG: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+      CI_COMMIT_TAG: ${{ needs.prepare.outputs.tag }}
       CI_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
       CI_PROJECT_NAME: ${{ github.event.repository.name }}
       CI_PROJECT_PATH: ${{ github.repository }}
@@ -126,6 +215,8 @@ jobs:
           if-no-files-found: error
 
   docker-build:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
+    needs: prepare
     runs-on: ubuntu-22.04
 
     permissions:
@@ -146,12 +237,7 @@ jobs:
         id: version
         shell: bash
         run: |
-          if [[ -f version.txt ]]; then
-            VERSION="$(tr -d '\n' < version.txt)"
-            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          else
-            echo "version=" >> "$GITHUB_OUTPUT"
-          fi
+          echo "version=${{ needs.prepare.outputs.version }}" >> "$GITHUB_OUTPUT"
 
       - name: Define image repository
         id: image
@@ -207,8 +293,9 @@ jobs:
           echo "${{ steps.meta.outputs.tags }}"
 
   release:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-22.04
-    needs: [build-deb, build-rpm]
+    needs: [prepare, build-deb-amd64, build-deb-arm64, build-rpm]
 
     permissions:
       contents: write
@@ -233,8 +320,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          TAG="${GITHUB_REF_NAME}"
-          VERSION="${TAG#v}"
+          TAG="${{ needs.prepare.outputs.tag }}"
+          VERSION="${{ needs.prepare.outputs.version }}"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
@@ -251,7 +338,7 @@ jobs:
             ## Packages
 
             This release includes:
-            - Debian package (`.deb`)
+            - Debian packages for `amd64` and `arm64` (`.deb`)
             - RPM package (`.rpm`)
             - `checksums.txt` with SHA256 hashes
 
@@ -261,6 +348,8 @@ jobs:
             curl -fL -o /tmp/sorba-dashboard-ui_${VERSION}_amd64.deb https://github.com/${{ github.repository }}/releases/download/${{ steps.relvars.outputs.tag }}/sorba-dashboard-ui_${VERSION}_amd64.deb
             sudo apt install -y /tmp/sorba-dashboard-ui_${VERSION}_amd64.deb
             ```
+
+            For ARM64, replace `amd64` with `arm64` in the package name and URL.
 
             ### Install on RHEL9
             ```bash
