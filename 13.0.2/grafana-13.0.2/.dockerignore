@@ -1,0 +1,11 @@
+node_modules
+**/node_modules
+.nx
+public/build
+public/.build-docker
+data
+bin
+.git
+# e2e-playwright/test-plugins/* son workspaces declarados en package.json:
+# sin ellos `yarn install --immutable` falla con YN0028 (el lockfile
+# tendria que modificarse). No excluir e2e-playwright del contexto.

@@ -1,0 +1,117 @@
+{
+  "3329-react19.6b2db7bedd2ee2e88dc5.js": {
+    "src": "public/build/3329-react19.6b2db7bedd2ee2e88dc5.js",
+    "integrity": "sha384-iYw0FxnRcnYBclZo/fWN6VNrwIXD1KescF0SN4ljt/klGNVtXziDE3rRGFzPGxvx sha512-Hi3OqYU7Q9dfyXIIANdUn8RFbHfFgPF0716CreS/BJ3q0AUfefl5lfJe8FcBCPrZr9Q/hLWqvvPnPAD8ugWM3g=="
+  },
+  "522-react19.50dbcd5b16da22d5be9e.js": {
+    "src": "public/build/522-react19.50dbcd5b16da22d5be9e.js",
+    "integrity": "sha384-UDCC7TfdRzQSahPEZ2k/QyvCCiX9oiwKerEsPcZ7jbcOThJTpjgqJT7yV1n1CQzl sha512-roRRXt1q+sZKB8PUqSb6/44I+IMLRnE5NT9AMi0R2qOoZaRuunZljUx9irJ027Bfc+ngbtgE9QqdgbUvpZBd2Q=="
+  },
+  "6029-react19.bd349141416938549393.js": {
+    "src": "public/build/6029-react19.bd349141416938549393.js",
+    "integrity": "sha384-Qk40CPD3xtyY48uTCPAdktenHdjopzo4eJqgu4MYF9qRK2ZfMWvcLrYBPG/Gw+sV sha512-RsByqLPRgpa6JpFp1nmVwc58iwjIFRw56qF370EJnHnbjoKdYtsXQu8cpWNOQz+AOU/qa4uKq76ORJ3RbUzggA=="
+  },
+  "6182-react19.e6086359e1370da46b40.js": {
+    "src": "public/build/6182-react19.e6086359e1370da46b40.js",
+    "integrity": "sha384-FHZf2y2KAX6eLegMXOCnZXvcEcUy07wTDwsYHnfXlP/f5OkeA+3L9JyjG2WQNrnc sha512-hlrA7a1hixJfZwuG+2xRyq4to72xJJ9MAsZOfyEDNTOdxX6CmysDVOdJOjFiRuScgptNyp1Yp/WZTj6/hDmh8w=="
+  },
+  "7457-react19.28a9b1ee809bf320e386.js": {
+    "src": "public/build/7457-react19.28a9b1ee809bf320e386.js",
+    "integrity": "sha384-Nq6wnEJ+LROWNotR90b8t9MPkykr4DL6srBmYq+Zaw22jcZdcNN8z4YTEtzGJePB sha512-OrfAhTPyOwrcq9dMj+WYdzp9Te5q9Huv9JvgO2mKKFM9zTkPETmCNyv/5MIjZat3cMM0wZAB97AZGWrQXcAnkw=="
+  },
+  "9363-react19.19f5da513ad68cc8e357.js": {
+    "src": "public/build/9363-react19.19f5da513ad68cc8e357.js",
+    "integrity": "sha384-vEVuUhpIt9WQ+wNPjyxm9i6/Ac56wohe9JAifvdDF7NsJ44NSspJqF7wP8K1kcbN sha512-qOP19xEIyh8M1GMMEy4PNBXj0/trPJNf2PJHYAvFvfISICrjX2buPdJ3ZCOx/iqZgSdvoSGgEczEtReQGIErDQ=="
+  },
+  "app.css": {
+    "src": "public/build/grafana.app-react19.6c9ee06a74ba648e0fa8.css",
+    "integrity": "sha384-Vie0TmhUnMtWMSQzONex3LalQ7e+hj5rZtD5im7Z+jxVYbqzyFmVcXHJOCU4019G sha512-KhFv7Lz9RnT6axJR076USNvS1Z0AibxVylTa3/fioHyYyHI0wmVLHOruLvtR0JPBX8XPIUKrhxKJm1gRKLE1gA=="
+  },
+  "app.js": {
+    "src": "public/build/app-react19.1846e8c96d08c32d1310.js",
+    "integrity": "sha384-VcrJfbkA0NJBAtnckEjSL1XBPqccRGmBOBV8FgJjPi5HkJ5S5CT9eW2qXVe43z6U sha512-yXwGGwVLo3jb86JEkNakgCOBGF9wWruliu5HU77qPf5e9LXT2U47b03Qfx4WyPS4kV3Jr4wC+S/z2nwzC0uoGQ=="
+  },
+  "dark.css": {
+    "src": "public/build/grafana.dark-react19.d5a794927756549b8010.css",
+    "integrity": "sha384-ViavHkexdj9rD/7nSA7IeVVVlslBaeoKlwW7Mf0dGHfwfhjSy3mF4eBoXye8RM/I sha512-ikh1avNKntA0RDVcVBCUb8Gk4mRWQgUXjw8o1E7xiNt9+U6rgB62Rj+yO0hsgPqvyPeCHIFoBw/5Jd6A4IWYWA=="
+  },
+  "dark.js": {
+    "src": "public/build/dark-react19.8606c52556ad6e73d34c.js",
+    "integrity": "sha384-IBqvzBhJ3NcJWDMAaYtP3MKwhcGmt9N12A5Io3vhiSQ8hhmNuTlSDBgTK57JvE+I sha512-+YvbjQw8XhF3i2f7Y4OAanQtxZsOY25LNmHG2jXZBXmyJwfE4Sk673BvefSqQa4BcFNqHm1xPRkQ342ypc/26g=="
+  },
+  "light.css": {
+    "src": "public/build/grafana.light-react19.c03324a027191f8dde53.css",
+    "integrity": "sha384-eFF3srvcgygySmAMHc6l9IJHuCneCmSASvegodGNUAiafcuwyVqiJLBrD36aCvYu sha512-aNq+qhtAlMprkc6KtbCIhjwx8GQ6dL84yI+BUSQwLLnFnJdUcxRaYgHFUK/xNLTZKbYQRPACdqCrBgXkhnnahw=="
+  },
+  "light.js": {
+    "src": "public/build/light-react19.b24f789983b0ee2b9094.js",
+    "integrity": "sha384-k1X5MqgfSb4c4L2gpxSFBxlaHpLahv2G/67eMIeWWYYHHdb8osiW+GAH5XE8RD77 sha512-30zdWV5yaRDXkxNH9BBqgx2RE1DvWMVvp7pGoXX40GqityHdOUVuk7mUqWAHMf6gpRzTb777LfInY5hnbYtlAQ=="
+  },
+  "runtime.js": {
+    "src": "public/build/runtime-react19.1bc3c15c88d3b757f23f.js",
+    "integrity": "sha384-ygsFL+SY9sTspa451sVo0G6VVPhcbAeBr2BAcGu7QIJLQqwB/swhui+VSWhtJyZ2 sha512-4qA2OKPb725YD58JQIzBzzgTW1nWT7QGXpgb9pOSb54adEkBuf27qyRsRPJmKRO5iEVCOtTs3PpxGdQymP4r6g=="
+  },
+  "swagger.css": {
+    "src": "public/build/grafana.swagger-react19.1e30a363d4bd7a2f1229.css",
+    "integrity": "sha384-E0bcmTY2ivLkH0mM5jvNYjBISo7CGSp7XVkt4D9bALKu74k750krHZDd07Wvn4Q1 sha512-hwrDXG0wgOg93RnDSHq/zS7hLlgcSyEMxOmgPity5zvwNfbpQwHEoRBrmaiwtulr6dlAb77AAQqtUc4qSYEL0w=="
+  },
+  "swagger.js": {
+    "src": "public/build/swagger-react19.9247789f8fd53254a1be.js",
+    "integrity": "sha384-307bHlJ0qzTIU2SvX7fCUUBnHHJF86ParEEX66X9s1Ydix5aki+3w0WAUrPS2P+K sha512-L5ShVOLAMeIFg+o9SjHTN32A4dVuWZW9GicfiKdBHH94g2bE7JuXphR/Ftm+HXx7X1xSpjGgHOtntZAi/HQpJA=="
+  },
+  "entrypoints": {
+    "app": {
+      "assets": {
+        "js": [
+          "public/build/runtime-react19.1bc3c15c88d3b757f23f.js",
+          "public/build/6029-react19.bd349141416938549393.js",
+          "public/build/3329-react19.6b2db7bedd2ee2e88dc5.js",
+          "public/build/522-react19.50dbcd5b16da22d5be9e.js",
+          "public/build/6182-react19.e6086359e1370da46b40.js",
+          "public/build/7457-react19.28a9b1ee809bf320e386.js",
+          "public/build/app-react19.1846e8c96d08c32d1310.js"
+        ],
+        "css": [
+          "public/build/grafana.app-react19.6c9ee06a74ba648e0fa8.css"
+        ]
+      }
+    },
+    "swagger": {
+      "assets": {
+        "js": [
+          "public/build/runtime-react19.1bc3c15c88d3b757f23f.js",
+          "public/build/6029-react19.bd349141416938549393.js",
+          "public/build/3329-react19.6b2db7bedd2ee2e88dc5.js",
+          "public/build/9363-react19.19f5da513ad68cc8e357.js",
+          "public/build/6182-react19.e6086359e1370da46b40.js",
+          "public/build/swagger-react19.9247789f8fd53254a1be.js"
+        ],
+        "css": [
+          "public/build/grafana.swagger-react19.1e30a363d4bd7a2f1229.css"
+        ]
+      }
+    },
+    "dark": {
+      "assets": {
+        "js": [
+          "public/build/runtime-react19.1bc3c15c88d3b757f23f.js",
+          "public/build/dark-react19.8606c52556ad6e73d34c.js"
+        ],
+        "css": [
+          "public/build/grafana.dark-react19.d5a794927756549b8010.css"
+        ]
+      }
+    },
+    "light": {
+      "assets": {
+        "js": [
+          "public/build/runtime-react19.1bc3c15c88d3b757f23f.js",
+          "public/build/light-react19.b24f789983b0ee2b9094.js"
+        ],
+        "css": [
+          "public/build/grafana.light-react19.c03324a027191f8dde53.css"
+        ]
+      }
+    }
+  }
+}
