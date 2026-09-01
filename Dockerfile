@@ -1,4 +1,12 @@
-ARG GRAFANA_VERSION="8.4.3"
+ARG GRAFANA_VERSION="13.0.2"
+
+# Builds the Sorba plugins (ae3e-plotly-panel, sorba-video-panel) from source; grafana-cli's catalog install would fetch the unrelated upstream ae3e-plotly-panel instead.
+FROM node:24-bookworm AS plugins
+RUN corepack enable && corepack prepare yarn@1.22.22 --activate
+ENV SOURCE_GRAFANA_DIR=/staging
+WORKDIR /plugins
+COPY plugins/ .
+RUN chmod +x build-plugins.sh && ./build-plugins.sh
 
 FROM grafana/grafana:${GRAFANA_VERSION}
 
@@ -6,7 +14,7 @@ USER root
 
 ARG GF_GID="0" \
   NAME="sorba-dashboard-ui" \
-  VERSION="8.4.3-9"
+  VERSION="13.0.2-1"
 
 ENV GF_PATHS_PLUGINS="/var/lib/grafana/plugins" \
   GF_APP_MODE="production" \
@@ -46,11 +54,11 @@ COPY docker/run.sh /run.sh
 
 RUN chmod +x /run.sh
 
-# COPY --chown=grafana --from=development /root/plugins/ ${GF_PATHS_PLUGINS}
+COPY --chown=grafana:${GF_GID} --from=plugins /staging/var/lib/grafana/plugins/ ${GF_PATHS_PLUGINS}/
 
 USER grafana
 
-ARG GF_INSTALL_PLUGINS="ae3e-plotly-panel, isaozler-paretochart-panel, natel-discrete-panel, yesoreyeram-boomtable-panel"
+ARG GF_INSTALL_PLUGINS="isaozler-paretochart-panel, natel-discrete-panel, yesoreyeram-boomtable-panel"
 
 RUN if [ ! -z "${GF_INSTALL_PLUGINS}" ]; then \
   OLDIFS=$IFS; \
@@ -67,8 +75,12 @@ RUN if [ ! -z "${GF_INSTALL_PLUGINS}" ]; then \
   done \
 fi
 
-COPY 8.4.3/conf/grafana.ini ${GF_PATHS_CONFIG}
-COPY 8.4.3/public/ ${GF_PATHS_HOME}/public/
+COPY 13.0.2/grafana-13.0.2/conf/custom.ini ${GF_PATHS_CONFIG}
+COPY 13.0.2/grafana-13.0.2/public/build/ ${GF_PATHS_HOME}/public/build/
+COPY 13.0.2/grafana-13.0.2/public/dashboards/ ${GF_PATHS_HOME}/public/dashboards/
+COPY 13.0.2/grafana-13.0.2/public/views/ ${GF_PATHS_HOME}/public/views/
+COPY 13.0.2/grafana-13.0.2/public/img/ ${GF_PATHS_HOME}/public/img/
+COPY 13.0.2/grafana-13.0.2/public/vendor/ ${GF_PATHS_HOME}/public/vendor/
 
 COPY docker/provisioning/ ${GF_PATHS_PROVISIONING}/
 # COPY docker/cloud-dashboards/ ${GF_PATHS_HOME}/dashboards/

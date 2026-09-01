@@ -4,28 +4,21 @@ set -eu
 
 GRAFANA_VERSION="13.0.2"
 GRAFANA_SRC="${GRAFANA_VERSION}/grafana-${GRAFANA_VERSION}"
+GRAFANA_TARBALL_URL="https://dl.grafana.com/oss/release/grafana-${GRAFANA_VERSION}.linux-amd64.tar.gz"
+GRAFANA_TARBALL_SHA256="${GRAFANA_TARBALL_SHA256:-6720d8b0b48d92e2b33b7bf30b38480c12964ccd87285e5e754aa554165edf2d}"
 
-TARGET_ARCH="${TARGET_ARCH:-${DEB_ARCH:-amd64}}"
-SOURCE_DEB_DIR="$HOME/dashboard-13-${TARGET_ARCH}"
-SOURCE_PLUGINS_DIR="$HOME/dashboard-13-plugins-${TARGET_ARCH}"
-DOWNLOAD_DIR="$HOME/dashboard-13-downloads-${TARGET_ARCH}"
-GRAFANA_HOME="${SOURCE_DEB_DIR}/usr/share/grafana"
+# Copied whole-directory from GRAFANA_SRC/public/ into the package; the rest of public/ is monorepo source, already covered by the release.
+SORBA_PUBLIC_PATHS="build dashboards views img vendor"
+
+SOURCE_FILES_DIR="$HOME/rpm-13-files"
+SOURCE_PLUGINS_DIR="$HOME/rpm-13-plugins"
+DOWNLOAD_DIR="$HOME/rpm-13-downloads"
+SOURCE_RPM_DIR="$HOME/rpmbuild-13"
+GRAFANA_HOME="${SOURCE_FILES_DIR}/usr/share/grafana"
 
 if [ -z "${CI_PROJECT_DIR:-}" ]; then
   CI_PROJECT_DIR=$(pwd)
 fi
-
-case "$TARGET_ARCH" in
-  x86_64)
-    TARGET_ARCH="amd64"
-    ;;
-  aarch64)
-    TARGET_ARCH="arm64"
-    ;;
-esac
-
-# Copied whole-directory from GRAFANA_SRC/public/ into the package; the rest of public/ is monorepo source, already covered by the release.
-SORBA_PUBLIC_PATHS="build dashboards views img vendor"
 
 download_file() {
   url="$1"
@@ -70,24 +63,7 @@ verify_sha256() {
   fi
 }
 
-resolve_download_metadata() {
-  case "$TARGET_ARCH" in
-    amd64)
-      GRAFANA_TARBALL_URL="https://dl.grafana.com/oss/release/grafana-${GRAFANA_VERSION}.linux-amd64.tar.gz"
-      GRAFANA_TARBALL_SHA256="${GRAFANA_TARBALL_SHA256:-6720d8b0b48d92e2b33b7bf30b38480c12964ccd87285e5e754aa554165edf2d}"
-      ;;
-    arm64)
-      GRAFANA_TARBALL_URL="https://dl.grafana.com/oss/release/grafana-${GRAFANA_VERSION}.linux-arm64.tar.gz"
-      GRAFANA_TARBALL_SHA256="${GRAFANA_TARBALL_SHA256:-beabeddf14dd5f435ac0c6d7fac71a585381515e879cc44eeea79a4ff7f7e52c}"
-      ;;
-    *)
-      echo "Unsupported Grafana download arch=${TARGET_ARCH}" >&2
-      exit 1
-      ;;
-  esac
-}
-
-for f in "${CI_PROJECT_DIR}/package/DEBIAN/control" \
+for f in "${CI_PROJECT_DIR}/package/RPMBUILD/SPECS/sorba-dashboard-ui.spec" \
          "${CI_PROJECT_DIR}/${GRAFANA_SRC}/conf/custom.ini" \
          "${CI_PROJECT_DIR}/version_13.txt"; do
   if [ ! -f "$f" ]; then
@@ -102,17 +78,13 @@ if [ ! -d "${CI_PROJECT_DIR}/${GRAFANA_SRC}/public/build" ]; then
   exit 1
 fi
 
-rm -rf "$SOURCE_DEB_DIR" "$SOURCE_PLUGINS_DIR" "$DOWNLOAD_DIR"
-mkdir -p "$GRAFANA_HOME" "$SOURCE_PLUGINS_DIR" "$DOWNLOAD_DIR"
+rm -rf "$SOURCE_FILES_DIR" "$SOURCE_PLUGINS_DIR" "$SOURCE_RPM_DIR" "$DOWNLOAD_DIR"
+mkdir -p "$GRAFANA_HOME" "$SOURCE_PLUGINS_DIR" "$DOWNLOAD_DIR" "${SOURCE_RPM_DIR}/SOURCES"
 
-cp -r "${CI_PROJECT_DIR}/package/DEBIAN" "${SOURCE_DEB_DIR}/"
-cp -r "${CI_PROJECT_DIR}/package/files/." "${SOURCE_DEB_DIR}/"
+cp -r "${CI_PROJECT_DIR}/package/files/." "${SOURCE_FILES_DIR}/"
+cp -r "${CI_PROJECT_DIR}/package/RPMBUILD/." "${SOURCE_RPM_DIR}/"
 
-resolve_download_metadata
-
-GRAFANA_TARBALL_NAME=$(basename "$GRAFANA_TARBALL_URL")
-GRAFANA_TARBALL_PATH="${DOWNLOAD_DIR}/${GRAFANA_TARBALL_NAME}"
-
+GRAFANA_TARBALL_PATH="${DOWNLOAD_DIR}/$(basename "$GRAFANA_TARBALL_URL")"
 if [ ! -f "$GRAFANA_TARBALL_PATH" ]; then
   download_file "$GRAFANA_TARBALL_URL" "$GRAFANA_TARBALL_PATH"
 fi
@@ -155,7 +127,7 @@ for pth in $SORBA_PUBLIC_PATHS; do
   cp -r "$src" "$dest_parent/"
 done
 
-# custom.ini is required; without it postinst falls back to upstream defaults.ini.
+# custom.ini is required; without it the postinstall falls back to upstream defaults.ini.
 cp "${CI_PROJECT_DIR}/${GRAFANA_SRC}/conf/custom.ini" "${GRAFANA_HOME}/conf/custom.ini"
 
 if [ -f "${CI_PROJECT_DIR}/${GRAFANA_SRC}/conf/provisioning/datasources/influx_data.yaml" ]; then
@@ -167,44 +139,31 @@ fi
 # Skip node_modules/dist; a foreign node_modules has broken .bin/ shims. build-plugins.sh installs fresh.
 ( cd "${CI_PROJECT_DIR}/plugins" && tar -cf - --exclude=node_modules --exclude=dist . ) \
   | ( cd "$SOURCE_PLUGINS_DIR" && tar -xf - )
-SOURCE_GRAFANA_DIR="$SOURCE_DEB_DIR"
+SOURCE_GRAFANA_DIR="$SOURCE_FILES_DIR"
 export SOURCE_GRAFANA_DIR
 chmod +x "$SOURCE_PLUGINS_DIR/build-plugins.sh" && ( cd "$SOURCE_PLUGINS_DIR" && ./build-plugins.sh )
 
 # Source maps are ~67% of the bundle; SORBA_KEEP_SOURCEMAPS=1 keeps them.
 if [ "${SORBA_KEEP_SOURCEMAPS:-0}" != "1" ]; then
-  find "$SOURCE_DEB_DIR" -name "*.map" -delete
+  find "$SOURCE_FILES_DIR" -name "*.map" -delete
 fi
 
-if [ -f "${CI_PROJECT_DIR}/version_13.txt" ]; then
-  VERSION=$(cat "${CI_PROJECT_DIR}/version_13.txt")
-else
-  VERSION="${GRAFANA_VERSION}-1"
-fi
+FULL_VERSION=$(cat "${CI_PROJECT_DIR}/version_13.txt")
+VERSION=$(echo "$FULL_VERSION" | cut -d'-' -f1)
+RELEASE=$(echo "$FULL_VERSION" | cut -d'-' -f2)
 
-chmod -R 755 "$SOURCE_DEB_DIR"
+chmod -R 755 "$SOURCE_FILES_DIR"
 chmod 644 "${GRAFANA_HOME}/conf/custom.ini"
-echo "$VERSION" > "${GRAFANA_HOME}/VERSION"
+echo "$FULL_VERSION" > "${GRAFANA_HOME}/VERSION"
 
-sed -i "s/^Version:.*/Version: ${VERSION}/" "${SOURCE_DEB_DIR}/DEBIAN/control"
-sed -i "s/^Architecture:.*/Architecture: ${TARGET_ARCH}/" "${SOURCE_DEB_DIR}/DEBIAN/control"
+tar -czf "${SOURCE_RPM_DIR}/SOURCES/files.tar.gz" -C "$SOURCE_FILES_DIR" .
 
-(
-  cd "$SOURCE_DEB_DIR"
-  find etc usr var -type f -print0 | LC_ALL=C sort -z | xargs -0 md5sum > DEBIAN/md5sums
-)
+rpmbuild -bb \
+  --define "_topdir ${SOURCE_RPM_DIR}" \
+  --define "_version ${VERSION}" \
+  --define "release ${RELEASE}" \
+  "${SOURCE_RPM_DIR}/SPECS/sorba-dashboard-ui.spec"
 
-INSTALLED_SIZE=$(du -sk "$SOURCE_DEB_DIR" | awk '{ print $1 }')
-sed -i "s/^Installed-Size:.*/Installed-Size: ${INSTALLED_SIZE}/" "${SOURCE_DEB_DIR}/DEBIAN/control"
+mv "${SOURCE_RPM_DIR}"/RPMS/*/*.rpm "${CI_PROJECT_DIR}/"
 
-PACKAGE_NAME=$(sed -n 's/^Package:[[:space:]]*//p' "${SOURCE_DEB_DIR}/DEBIAN/control" | head -n 1)
-
-if [ -z "$PACKAGE_NAME" ]; then
-  echo "Unable to determine package name from DEBIAN/control" >&2
-  exit 1
-fi
-
-DEB_FILENAME="${PACKAGE_NAME}_${VERSION}_${TARGET_ARCH}.deb"
-dpkg-deb -b "$SOURCE_DEB_DIR" "${CI_PROJECT_DIR}/${DEB_FILENAME}"
-
-echo "Package created: ${CI_PROJECT_DIR}/${DEB_FILENAME}"
+echo "Package created: $(ls "${CI_PROJECT_DIR}"/sorba-dashboard-ui-"${VERSION}"-"${RELEASE}"*.rpm)"

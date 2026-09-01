@@ -21,7 +21,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          VERSION="$(tr -d '\r\n' < version.txt)"
+          VERSION="$(tr -d '\r\n' < version_13.txt)"
           echo "tag=v${VERSION}" >> "$GITHUB_OUTPUT"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
@@ -59,16 +59,16 @@ jobs:
       - name: Validate required files
         run: |
           set -e
-          test -f deb_build.sh
-          test -f version.txt
+          test -f deb_build_13.sh
+          test -f version_13.txt
           test -d package/DEBIAN
           test -d package/files
 
       - name: Ensure build script is executable
-        run: chmod +x deb_build.sh
+        run: chmod +x deb_build_13.sh
 
       - name: Build Debian package
-        run: ./deb_build.sh
+        run: ./deb_build_13.sh
 
       - name: Validate generated package
         run: |
@@ -117,16 +117,16 @@ jobs:
       - name: Validate required files
         run: |
           set -e
-          test -f deb_build.sh
-          test -f version.txt
+          test -f deb_build_13.sh
+          test -f version_13.txt
           test -d package/DEBIAN
           test -d package/files
 
       - name: Ensure build script is executable
-        run: chmod +x deb_build.sh
+        run: chmod +x deb_build_13.sh
 
       - name: Build Debian package
-        run: ./deb_build.sh
+        run: ./deb_build_13.sh
 
       - name: Validate generated package
         run: |

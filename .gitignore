@@ -1,4 +1,2 @@
-13.0.2/grafana-13.0.2/.*
-13.0.2/grafana-13.0.2/node_modules
-13.0.2/grafana-13.0.2/e2e-playwright/*
-sorba-dashboard-ui_*.deb
+*.deb
+*.rpm
