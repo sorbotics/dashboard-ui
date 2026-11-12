@@ -6,7 +6,7 @@ on:
 jobs:
   prepare:
     name: Prepare build variables
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
 
     outputs:
       tag: ${{ steps.build-vars.outputs.tag }}
@@ -28,7 +28,7 @@ jobs:
   build-deb-amd64:
     name: Build Debian package (amd64)
     needs: prepare
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
 
     env:
       CI: "true"
@@ -46,10 +46,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 18
+      - name: Setup Node.js 26
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '26'
 
       - name: Install Debian packaging tools
         run: |
@@ -85,7 +85,7 @@ jobs:
   build-deb-arm64:
     name: Build Debian package (arm64)
     needs: prepare
-    runs-on: ubuntu-22.04-arm
+    runs-on: ubuntu-26.04-arm
 
     env:
       CI: "true"
@@ -103,10 +103,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 18
+      - name: Setup Node.js 26
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '26'
 
       - name: Install Debian packaging tools
         run: |
