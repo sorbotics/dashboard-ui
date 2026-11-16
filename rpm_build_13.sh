@@ -101,6 +101,20 @@ rm -f "${GRAFANA_HOME}/conf/sample.ini"
 rm -rf "${GRAFANA_HOME}/conf/provisioning/sample"
 find "${GRAFANA_HOME}/conf/provisioning" -name 'sample.yaml' -delete 2>/dev/null || true
 
+# package/files is shared with the 8.4.3 stream and carries its standalone grafana-cli binary,
+# which the 13.x release (bin/grafana only) does not overwrite. Replace it with a shim.
+cat > "${GRAFANA_HOME}/bin/grafana-cli" <<'EOF'
+#!/bin/sh
+exec "$(dirname "$0")/grafana" cli "$@"
+EOF
+# The shared spec lists /usr/sbin/grafana-server (8.4.3 ships a binary there); 13.x needs a wrapper instead.
+cat > "${SOURCE_FILES_DIR}/usr/sbin/grafana-server" <<'EOF'
+#!/bin/sh
+exec /usr/share/grafana/bin/grafana server "$@"
+EOF
+# Other 8.4.3 leftovers from package/files; the release's plugins-bundled/ is empty (bundled plugins live in data/).
+rm -rf "${GRAFANA_HOME}/scripts" "${GRAFANA_HOME}/plugins-bundled/internal"
+
 # Only plugin.json, dist/, and img/ are needed at runtime from public/app/.
 find "${GRAFANA_HOME}/public/app" -type f \
   \( -name '*.ts' -o -name '*.tsx' -o -name '*.map' -o -name '*.md' \
@@ -155,6 +169,20 @@ RELEASE=$(echo "$FULL_VERSION" | cut -d'-' -f2)
 chmod -R 755 "$SOURCE_FILES_DIR"
 chmod 644 "${GRAFANA_HOME}/conf/custom.ini"
 echo "$FULL_VERSION" > "${GRAFANA_HOME}/VERSION"
+
+# Non-amd64 hosts can't execute the amd64 binary, so the check only runs where it can.
+if "${GRAFANA_HOME}/bin/grafana" --version >/dev/null 2>&1; then
+  CLI_VERSION=$("${GRAFANA_HOME}/bin/grafana-cli" -v 2>&1 || true)
+  case "$CLI_VERSION" in
+    *"$GRAFANA_VERSION"*) ;;
+    *)
+      echo "bin/grafana-cli reports '${CLI_VERSION}', expected ${GRAFANA_VERSION}" >&2
+      exit 1
+      ;;
+  esac
+else
+  echo "Skipping grafana-cli version check: cannot run the amd64 binary on this host" >&2
+fi
 
 tar -czf "${SOURCE_RPM_DIR}/SOURCES/files.tar.gz" -C "$SOURCE_FILES_DIR" .
 
