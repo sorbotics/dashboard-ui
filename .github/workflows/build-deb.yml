@@ -60,20 +60,29 @@ jobs:
         run: |
           set -e
           test -f deb_build.sh
+          test -f deb_build_10.sh
           test -f version.txt
+          test -f version_10.txt
           test -d package/DEBIAN
           test -d package/files
 
-      - name: Ensure build script is executable
-        run: chmod +x deb_build.sh
+      - name: Ensure build scripts are executable
+        run: chmod +x deb_build.sh deb_build_10.sh
 
       - name: Build Debian package
         run: ./deb_build.sh
 
-      - name: Validate generated package
+      - name: Build 10.4 transit Debian package
+        run: ./deb_build_10.sh
+
+      - name: Validate generated packages
         run: |
+          set -e
           ls -lah *.deb
-          test "$(dpkg-deb --field ./*.deb Architecture)" = "amd64"
+          test "$(ls *.deb | wc -l)" -eq 2
+          for deb in ./*.deb; do
+            test "$(dpkg-deb --field "$deb" Architecture)" = "amd64"
+          done
 
       - name: Upload Debian package artifact
         uses: actions/upload-artifact@v4
@@ -118,20 +127,29 @@ jobs:
         run: |
           set -e
           test -f deb_build.sh
+          test -f deb_build_10.sh
           test -f version.txt
+          test -f version_10.txt
           test -d package/DEBIAN
           test -d package/files
 
-      - name: Ensure build script is executable
-        run: chmod +x deb_build.sh
+      - name: Ensure build scripts are executable
+        run: chmod +x deb_build.sh deb_build_10.sh
 
       - name: Build Debian package
         run: ./deb_build.sh
 
-      - name: Validate generated package
+      - name: Build 10.4 transit Debian package
+        run: ./deb_build_10.sh
+
+      - name: Validate generated packages
         run: |
+          set -e
           ls -lah *.deb
-          test "$(dpkg-deb --field ./*.deb Architecture)" = "arm64"
+          test "$(ls *.deb | wc -l)" -eq 2
+          for deb in ./*.deb; do
+            test "$(dpkg-deb --field "$deb" Architecture)" = "arm64"
+          done
 
       - name: Upload Debian package artifact
         uses: actions/upload-artifact@v4
