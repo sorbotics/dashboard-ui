@@ -9,6 +9,10 @@ Source is not built here — both Grafana versions are vendored as pre-built tre
 | --- | --- | --- | --- |
 | 8.4.3 (legacy) | `8.4.3/` (only `conf/` + prebuilt `public/build/`) | `version.txt` | `deb_build.sh`, `rpm_build.sh` |
 | 13.0.2 (current) | `13.0.2/grafana-13.0.2/` (full upstream source) | `version_13.txt` | `deb_build_13.sh` |
+| 10.4.19 (transit, branch `10.4`) | `10.4.19/grafana-10.4.19/` (full upstream source + Sorba UI) | `version_10.txt` | `deb_build_10.sh` |
+
+The 10.4 stream is the intermediate step of the 8.4.3 → 10.4 → 13 upgrade path: 10.4 is the last Grafana that adds the legacy `playlist.uid` schema and converts legacy alerts, both required before 13 can start on an 8.4.3 database. Never publish its `.deb` to a repo or tag it `v*`.
+It carries the same Sorba frontend customizations as 13.0.2 (branding/login, `kiosk=full`, signup removed, `home.json`, `public/img` logos, `public/vendor/flot`, `custom.ini`), adapted to the 10.4 source. Frontend build: `cd 10.4.19/grafana-10.4.19 && yarn install --immutable && NODE_OPTIONS=--max-old-space-size=16384 yarn build` (Node 20), then `./deb_build_10.sh` with Node ≥22 on `PATH` (`plugins/ae3e-plotly-panel` requires it; `build-plugins.sh` does not fail the build when a plugin fails, it just leaves the plugin dir empty).
 
 `8.4.3/public/build/` is a pre-built webpack bundle (714+ chunked JS files in `8.4.3/public/build/`). Do not edit it directly; rebuild via the upstream Grafana 8.4.3 toolchain if needed.
 `13.0.2/grafana-13.0.2/` already has `node_modules/` populated. It also ships its own upstream `AGENTS.md` and `CLAUDE.md` — read those for upstream Grafana guidance, but those files do not describe the Sorba-specific packaging in this repo.
