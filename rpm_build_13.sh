@@ -158,8 +158,9 @@ export SOURCE_GRAFANA_DIR
 chmod +x "$SOURCE_PLUGINS_DIR/build-plugins.sh" && ( cd "$SOURCE_PLUGINS_DIR" && ./build-plugins.sh )
 
 # Source maps are ~67% of the bundle; SORBA_KEEP_SOURCEMAPS=1 keeps them.
+# Limited to public/: signed plugins list their .map files in MANIFEST.txt.
 if [ "${SORBA_KEEP_SOURCEMAPS:-0}" != "1" ]; then
-  find "$SOURCE_FILES_DIR" -name "*.map" -delete
+  find "${GRAFANA_HOME}/public" -name "*.map" -delete
 fi
 
 FULL_VERSION=$(cat "${CI_PROJECT_DIR}/version_13.txt")
